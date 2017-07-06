@@ -4,7 +4,7 @@ const assert = require('assert');
 
 const githubURL = 'api.github.com';
 const username = 'alecmerdler';
-const oauthToken = '212d8bdb7e34038f360e1324ae3c9d34948c04d3';
+const oauthToken = process.env.GITHUB_OAUTH_TOKEN;
 
 
 /**
@@ -51,17 +51,41 @@ const makeRequest = (endpoint, method, data) => {
  */
 async function testPublicGistsLength() {
     const response = await makeRequest('/gists/public', 'GET');
-    assert(response.length == 30);
+
+    assert(response.length == 30, `Getting public Gists returns 30 Gists.`);
 }
 /**
  * Confirm that the user `wolfordj` has at least one public Gist.
  */
 async function testInstructorPublicGistsLength() {
     const response = await makeRequest('/users/wolfordj/gists', 'GET');
-    assert(response.length >= 1);
+
+    assert(response.length >= 1, `Confirm that the user 'wolfordj' has at least one public Gist.`);
+}
+/**
+ * Confirm that when you create a Gist the number of Gists associated to your account increases by 1.
+ */
+async function testCreateGistIncreasesCount() {
+    let response = await makeRequest('/gists', 'GET');
+    const initialGists = response.length;
+    const postData = {
+        description: `Test gist for CS 461`,
+        public: true,
+        files: {
+           "file1.txt": {
+               content: "String file contents",
+           }
+        }
+    };
+    await makeRequest('/gists', 'POST', postData);
+    response = await makeRequest('/gists', 'GET');
+
+    assert(response.length == initialGists + 1,
+           `Confirm that when you create a Gist the number of Gists associated to your account increases by 1`);
 }
 
 
 // Run all the tests
 testPublicGistsLength();
 testInstructorPublicGistsLength();
+testCreateGistIncreasesCount();
