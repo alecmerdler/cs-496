@@ -104,6 +104,24 @@ async function testCreateGistMatchesContent() {
     assert(response['files']['file1.txt'].content === postData.files['file1.txt'].content,
            `Confirm that the contents of the Gist you created match the contents you sent.`);
 }
+/**
+ * Confirm that you are able to edit the contents of a Gist.
+ */
+async function testEditGistMatchesContent() {
+    let response = await makeRequest('/gists', 'GET');
+
+    const patchData = {
+        files: {
+            "file1.txt": {
+                content: "Edited file contents",
+            }
+        }
+    };
+    response = await makeRequest(`/gists/${response[0].id}`, 'PATCH', patchData);
+
+    assert(response['files']['file1.txt'].content === patchData.files['file1.txt'].content,
+           `Confirm that you are able to edit the contents of a Gist.`);
+}
 
 // Run all the tests
 Promise.all([
@@ -111,6 +129,7 @@ Promise.all([
     testInstructorPublicGistsLength(),
     testCreateGistIncreasesCount(),
     testCreateGistMatchesContent(),
+    testEditGistMatchesContent(),
 ])
 .then(() => {
     console.log(`All tests passed!`);
