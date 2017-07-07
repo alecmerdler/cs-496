@@ -52,7 +52,8 @@ const makeRequest = (endpoint, method, data) => {
 async function testPublicGistsLength() {
     const response = await makeRequest('/gists/public', 'GET');
 
-    assert(response.length == 30, `Getting public Gists returns 30 Gists.`);
+    assert(response.length == 30,
+           `Getting public Gists returns 30 Gists.`);
 }
 /**
  * Confirm that the user `wolfordj` has at least one public Gist.
@@ -60,7 +61,8 @@ async function testPublicGistsLength() {
 async function testInstructorPublicGistsLength() {
     const response = await makeRequest('/users/wolfordj/gists', 'GET');
 
-    assert(response.length >= 1, `Confirm that the user 'wolfordj' has at least one public Gist.`);
+    assert(response.length >= 1,
+           `Confirm that the user 'wolfordj' has at least one public Gist.`);
 }
 /**
  * Confirm that when you create a Gist the number of Gists associated to your account increases by 1.
@@ -80,12 +82,39 @@ async function testCreateGistIncreasesCount() {
     await makeRequest('/gists', 'POST', postData);
     response = await makeRequest('/gists', 'GET');
 
-    assert(response.length == initialGists + 1,
-           `Confirm that when you create a Gist the number of Gists associated to your account increases by 1`);
+    // FIXME: Cannot check for increase by exactly 1 because tests are running async
+    assert(response.length >= initialGists + 1,
+           `Confirm that when you create a Gist the number of Gists associated to your account increases by 1.`);
+}
+/**
+ * Confirm that the contents of the Gist you created match the contents you sent.
+ */
+async function testCreateGistMatchesContent() {
+    const postData = {
+        description: `Test gist for CS 461`,
+        public: true,
+        files: {
+            "file1.txt": {
+                content: "String file contents",
+            }
+        }
+    };
+    const response = await makeRequest('/gists', 'POST', postData);
+
+    assert(response['files']['file1.txt'].content === postData.files['file1.txt'].content,
+           `Confirm that the contents of the Gist you created match the contents you sent.`);
 }
 
-
 // Run all the tests
-testPublicGistsLength();
-testInstructorPublicGistsLength();
-testCreateGistIncreasesCount();
+Promise.all([
+    testPublicGistsLength(),
+    testInstructorPublicGistsLength(),
+    testCreateGistIncreasesCount(),
+    testCreateGistMatchesContent(),
+])
+.then(() => {
+    console.log(`All tests passed!`);
+})
+.catch((error) => {
+    console.error(error);
+});
