@@ -47,6 +47,19 @@ const makeRequest = (endpoint, method, data) => {
 
 
 /**
+ * Remove any created Gists from the tests. Created Gists contain 'file1.txt'.
+ */
+async function cleanup() {
+    let response = await makeRequest('/gists', 'GET');
+    response
+        .filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)
+        .forEach((gist) => {
+            makeRequest(`/gists/${gist.id}`, 'DELETE');
+        });
+};
+
+
+/**
  * Getting public Gists returns 30 Gists.
  */
 async function testPublicGistsLength() {
@@ -109,6 +122,7 @@ async function testCreateGistMatchesContent() {
  */
 async function testEditGistMatchesContent() {
     let response = await makeRequest('/gists', 'GET');
+    const editedGistId = response.filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)[0].id;
 
     const patchData = {
         files: {
@@ -117,9 +131,9 @@ async function testEditGistMatchesContent() {
             }
         }
     };
-    response = await makeRequest(`/gists/${response[0].id}`, 'PATCH', patchData);
+    response = await makeRequest(`/gists/${editedGistId}`, 'PATCH', patchData);
 
-    assert(response['files']['file1.txt'].content === patchData.files['file1.txt'].content,
+    assert(response.files['file1.txt'].content === patchData.files['file1.txt'].content,
            `Confirm that you are able to edit the contents of a Gist.`);
 }
 /**
@@ -144,6 +158,7 @@ Promise.all([
 ])
 .then(() => {
     console.log(`All tests passed!`);
+    cleanup();
 })
 .catch((error) => {
     console.error(error);
