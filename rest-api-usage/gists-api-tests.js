@@ -34,7 +34,7 @@ const makeRequest = (endpoint, method, data) => {
             });
 
             response.on('end', () => {
-                resolve(JSON.parse(body));
+                resolve(body ? JSON.parse(body) : {});
             });
         });
 
@@ -122,6 +122,16 @@ async function testEditGistMatchesContent() {
     assert(response['files']['file1.txt'].content === patchData.files['file1.txt'].content,
            `Confirm that you are able to edit the contents of a Gist.`);
 }
+/**
+ * Confirm that you can add a star to a Gist
+ */
+async function testAddStarGist() {
+    let response = await makeRequest('/gists', 'GET');
+    await makeRequest(`/gists/${response[0].id}/star`, 'PUT');
+    response = await makeRequest(`/gists/${response[0].id}/star`, 'GET');
+
+    assert(true, `Confirm that you can add a star to a Gist.`);
+}
 
 // Run all the tests
 Promise.all([
@@ -130,6 +140,7 @@ Promise.all([
     testCreateGistIncreasesCount(),
     testCreateGistMatchesContent(),
     testEditGistMatchesContent(),
+    testAddStarGist(),
 ])
 .then(() => {
     console.log(`All tests passed!`);
