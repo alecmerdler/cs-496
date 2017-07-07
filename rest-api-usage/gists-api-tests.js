@@ -11,10 +11,10 @@ const oauthToken = process.env.GITHUB_OAUTH_TOKEN;
  * Execute a request against the Gists API.
  * @param endpoint The resource path.
  * @param method Which HTTP method to use.
- * @param data An object containing POST/PUT data.
+ * @param requestData An object containing POST/PUT data.
  * @returns response A promise that resolves to the response data.
  */
-const makeRequest = (endpoint, method, data) => {
+const makeRequest = (endpoint, method, requestData) => {
     return new Promise((resolve, reject) => {
         const request = https.request({
             hostname: githubURL,
@@ -34,12 +34,15 @@ const makeRequest = (endpoint, method, data) => {
             });
 
             response.on('end', () => {
-                resolve(body ? JSON.parse(body) : {});
+                const data = body ? JSON.parse(body) : null;
+                let result = {data: data, statusCode: response.statusCode};
+
+                resolve(result);
             });
         });
 
-        if (data) {
-            request.write(JSON.stringify(data));
+        if (requestData) {
+            request.write(JSON.stringify(requestData));
         }
         request.end();
     });
@@ -51,7 +54,7 @@ const makeRequest = (endpoint, method, data) => {
  */
 async function cleanup() {
     let response = await makeRequest('/gists', 'GET');
-    response
+    response.data
         .filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)
         .forEach((gist) => {
             makeRequest(`/gists/${gist.id}`, 'DELETE');
@@ -65,7 +68,7 @@ async function cleanup() {
 async function testPublicGistsLength() {
     const response = await makeRequest('/gists/public', 'GET');
 
-    assert(response.length == 30,
+    assert(response.data.length == 30,
            `Getting public Gists returns 30 Gists.`);
 }
 /**
@@ -74,7 +77,7 @@ async function testPublicGistsLength() {
 async function testInstructorPublicGistsLength() {
     const response = await makeRequest('/users/wolfordj/gists', 'GET');
 
-    assert(response.length >= 1,
+    assert(response.data.length >= 1,
            `Confirm that the user 'wolfordj' has at least one public Gist.`);
 }
 /**
@@ -82,7 +85,7 @@ async function testInstructorPublicGistsLength() {
  */
 async function testCreateGistIncreasesCount() {
     let response = await makeRequest('/gists', 'GET');
-    const initialGists = response.length;
+    const initialGists = response.data.length;
     const postData = {
         description: `Test gist for CS 461`,
         public: true,
@@ -96,7 +99,7 @@ async function testCreateGistIncreasesCount() {
     response = await makeRequest('/gists', 'GET');
 
     // FIXME: Cannot check for increase by exactly 1 because tests are running async
-    assert(response.length >= initialGists + 1,
+    assert(response.data.length >= initialGists + 1,
            `Confirm that when you create a Gist the number of Gists associated to your account increases by 1.`);
 }
 /**
@@ -114,7 +117,7 @@ async function testCreateGistMatchesContent() {
     };
     const response = await makeRequest('/gists', 'POST', postData);
 
-    assert(response['files']['file1.txt'].content === postData.files['file1.txt'].content,
+    assert(response.data['files']['file1.txt'].content === postData.files['file1.txt'].content,
            `Confirm that the contents of the Gist you created match the contents you sent.`);
 }
 /**
@@ -122,7 +125,7 @@ async function testCreateGistMatchesContent() {
  */
 async function testEditGistMatchesContent() {
     let response = await makeRequest('/gists', 'GET');
-    const editedGistId = response.filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)[0].id;
+    const editedGistId = response.data.filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)[0].id;
 
     const patchData = {
         files: {
@@ -133,7 +136,7 @@ async function testEditGistMatchesContent() {
     };
     response = await makeRequest(`/gists/${editedGistId}`, 'PATCH', patchData);
 
-    assert(response.files['file1.txt'].content === patchData.files['file1.txt'].content,
+    assert(response.data.files['file1.txt'].content === patchData.files['file1.txt'].content,
            `Confirm that you are able to edit the contents of a Gist.`);
 }
 /**
@@ -141,8 +144,8 @@ async function testEditGistMatchesContent() {
  */
 async function testAddStarGist() {
     let response = await makeRequest('/gists', 'GET');
-    await makeRequest(`/gists/${response[0].id}/star`, 'PUT');
-    response = await makeRequest(`/gists/${response[0].id}/star`, 'GET');
+    await makeRequest(`/gists/${response.data[0].id}/star`, 'PUT');
+    response = await makeRequest(`/gists/${response.data[0].id}/star`, 'GET');
 
     assert(true, `Confirm that you can add a star to a Gist.`);
 }
