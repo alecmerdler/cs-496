@@ -176,6 +176,18 @@ async function testUnstarGist() {
     assert(response.statusCode === 404,
            `Confirm you can remove a star from a Gist.`);
 }
+/**
+ * Confirm you can delete a Gist.
+ */
+async function testDeleteGist() {
+    let response = await makeRequest('/gists', 'GET');
+    const deletedGistId = response.data.filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)[2].id;
+    await makeRequest(`/gists/${deletedGistId}`, 'DELETE');
+    response = await makeRequest(`/gists/${deletedGistId}`, 'GET');
+
+    assert(response.statusCode === 404,
+           `Confirm you can delete a Gist.`);
+}
 
 
 // Run all the tests
@@ -188,6 +200,7 @@ Promise.all([
     testAddStarGist(),
     testStarredGistsList(),
     testUnstarGist(),
+    testDeleteGist(),
 ])
 .then(() => {
     console.log(`All tests passed!`);
