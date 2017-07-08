@@ -140,15 +140,31 @@ async function testEditGistMatchesContent() {
            `Confirm that you are able to edit the contents of a Gist.`);
 }
 /**
- * Confirm that you can add a star to a Gist
+ * Confirm that you can add a star to a Gist.
  */
 async function testAddStarGist() {
     let response = await makeRequest('/gists', 'GET');
     await makeRequest(`/gists/${response.data[0].id}/star`, 'PUT');
     response = await makeRequest(`/gists/${response.data[0].id}/star`, 'GET');
 
-    assert(true, `Confirm that you can add a star to a Gist.`);
+    assert(response.statusCode == 204,
+           `Confirm that you can add a star to a Gist.`);
 }
+/**
+ * Confirm that your list of Starred gists is correct.
+ */
+async function testStarredGistsList() {
+    let response = await makeRequest('/gists/starred', 'GET');
+    const starredGists = response.data;
+    Promise.all(starredGists.map(gist => makeRequest(`/gists/${gist.id}/star`)))
+        .then((responses) => {
+            responses.forEach((response) => {
+                assert(response.statusCode == 204,
+                      `Confirm that your list of Starred gists is correct.`);
+            });
+        });
+}
+
 
 // Run all the tests
 Promise.all([
@@ -158,6 +174,7 @@ Promise.all([
     testCreateGistMatchesContent(),
     testEditGistMatchesContent(),
     testAddStarGist(),
+    testStarredGistsList(),
 ])
 .then(() => {
     console.log(`All tests passed!`);
