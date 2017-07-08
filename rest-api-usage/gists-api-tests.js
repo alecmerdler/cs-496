@@ -164,6 +164,18 @@ async function testStarredGistsList() {
             });
         });
 }
+/**
+ * Confirm you can remove a star from a Gist.
+ */
+async function testUnstarGist() {
+    let response = await makeRequest('/gists', 'GET');
+    const unstarredGistId = response.data.filter(gist => Object.keys(gist.files).indexOf('file1.txt') != -1)[1].id;
+    await makeRequest(`/gists/${unstarredGistId}/star`, 'DELETE');
+    response = await makeRequest(`/gists/${unstarredGistId}/star`, 'GET');
+
+    assert(response.statusCode === 404,
+           `Confirm you can remove a star from a Gist.`);
+}
 
 
 // Run all the tests
@@ -175,6 +187,7 @@ Promise.all([
     testEditGistMatchesContent(),
     testAddStarGist(),
     testStarredGistsList(),
+    testUnstarGist(),
 ])
 .then(() => {
     console.log(`All tests passed!`);
