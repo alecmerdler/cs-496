@@ -191,21 +191,23 @@ async function testDeleteGist() {
 
 
 // Run all the tests
-Promise.all([
-    testPublicGistsLength(),
-    testInstructorPublicGistsLength(),
-    testCreateGistIncreasesCount(),
-    testCreateGistMatchesContent(),
-    testEditGistMatchesContent(),
-    testAddStarGist(),
-    testStarredGistsList(),
-    testUnstarGist(),
-    testDeleteGist(),
-])
-.then(() => {
-    console.log(`All tests passed!`);
-    cleanup();
-})
-.catch((error) => {
-    console.error(error);
-});
+[
+    testPublicGistsLength,
+    testInstructorPublicGistsLength,
+    testCreateGistIncreasesCount,
+    testCreateGistMatchesContent,
+    testEditGistMatchesContent,
+    testAddStarGist,
+    testStarredGistsList,
+    testUnstarGist,
+    testDeleteGist,
+].reduce((test, next) => {
+    console.log(`.`);
+    
+    return test.then(next);
+},
+    Promise.resolve())
+    .then(() => {
+        console.log(`All tests passed!`);
+        cleanup();
+    });
