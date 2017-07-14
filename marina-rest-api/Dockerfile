@@ -10,5 +10,5 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-EXPOSE 80
-CMD ["./manage.py", "runserver", "127.0.0.1:80"]
+EXPOSE 8000
+CMD ["./manage.py", "runserver", "127.0.0.1:8000"]
