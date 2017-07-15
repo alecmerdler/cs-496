@@ -34,6 +34,25 @@ class BoatViewSet(ModelViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
+    @detail_route(methods=['post'])
+    def dock(self, request, pk=None):
+        boat = self.get_object()
+        slip_number = request.data['slip_number']
+
+        if slip_number is not None:
+            slip = Slip.objects.get(number=slip_number)
+            if slip.current_boat is None:
+                slip.current_boat = boat
+                slip.save()
+
+                boat.at_sea = False
+                boat.save()
+
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+
 
 class SlipViewSet(ModelViewSet):
     """
