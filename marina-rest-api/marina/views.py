@@ -1,6 +1,8 @@
 from django.views import View
 from django.http import JsonResponse
 from models import Boat, Slip
+from rest_framework.viewsets import ModelViewSet
+from serializers import SlipSerializer, BoatSerializer
 import time
 
 
@@ -10,17 +12,17 @@ class MainView(View):
         return JsonResponse({'current_timestamp': time.time()})
 
 
-class BoatView(View):
+class BoatViewSet(ModelViewSet):
     """
     API endpoint for the boat resource.
     """
-    def get(self, request):
-        boats = Boat.objects.all()
-
-        return JsonResponse([{'id': boat.id} for boat in boats])
+    queryset = Boat.objects.all()
+    serializer_class = BoatSerializer
 
 
-class SlipView(View):
+class SlipViewSet(ModelViewSet):
     """
     API endpoint for the slip resource.
     """
+    queryset = Slip.objects.all()
+    serializer_class = SlipSerializer

@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Boat(models.Model):
-    id = models.CharField(max_length=30)
+    id = models.CharField(primary_key=True, max_length=30)
     name = models.CharField(max_length=30)
     type = models.CharField(max_length=30)
     length = models.PositiveIntegerField()
@@ -13,7 +13,7 @@ class Boat(models.Model):
 
 
 class Slip(models.Model):
-    id = models.CharField(max_length=30)
+    id = models.CharField(primary_key=True, max_length=30)
     number = models.PositiveIntegerField()
     current_boat = models.ForeignKey(Boat, null=True)
     arrival_date = models.CharField(max_length=9)
