@@ -53,6 +53,14 @@ async function testListBoats() {
            `List boats`);
 }
 
+async function testRetrieveBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const boatID = response.data[0].id;
+    response = await makeRequest(`/boats/${boatID}/`, 'GET');
+
+    assert(response.data.id === boatID);
+}
+
 async function testCreateBoat() {
     const postData = {
         type: "cruiseliner",
@@ -67,11 +75,66 @@ async function testCreateBoat() {
     assert(response.data.find(boat => boat.id === boatId) != undefined);
 }
 
+async function testUpdateBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const boat = response.data[0];
+    const updateData = {
+        length: boat.length + 10,
+    };
+
+    response = await makeRequest(`/boats/${boat.id}/`, 'PUT', updateData);
+
+    assert(response.data.length === updateData.length);
+}
+
+async function testDeleteBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const boatId = response.data[0].id;
+    await makeRequest(`/boats/${boatId}/`, 'DELETE');
+    response = await makeRequest(`/boats/`, 'GET');
+
+    assert(response.data.find(boat => boat.id === boatId) == undefined);
+}
+
+async function testSetSailBoat() {
+
+}
+
+async function testDockBoat() {
+
+}
+
+async function testListSlips() {
+
+}
+
+async function testRetrieveSlip() {
+
+}
+
+async function testCreateSlip() {
+
+}
+
+async function testUpdateSlip() {
+
+}
+
+async function testDeleteSlip() {
+
+}
+
+
+
 
 // Run all the tests
 [
     testListBoats(),
+    testRetrieveBoat(),
     testCreateBoat(),
+    testUpdateBoat(),
+    testDeleteBoat(),
+
 ].reduce((test, next) => {
         console.log(`.`);
 
