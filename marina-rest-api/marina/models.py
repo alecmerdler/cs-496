@@ -12,12 +12,24 @@ class Boat(models.Model):
     class Meta:
         app_label = 'marina'
 
+    def __str__(self):
+        return u"%s" % (self.name)
+
 
 class Slip(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     number = models.PositiveIntegerField()
-    current_boat = models.ForeignKey(Boat, null=True)
+    current_boat = models.ForeignKey(Boat, null=True, on_delete=models.SET_NULL)
     arrival_date = models.CharField(max_length=9)
+
+    def delete(self):
+        if self.current_boat:
+            self.current_boat.at_sea = True
+            self.current_boat.save()
+        super(Slip, self).delete()
 
     class Meta:
         app_label = 'marina'
+
+    def __str__(self):
+        return u"%s" % (self.number)
