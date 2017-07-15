@@ -21,7 +21,7 @@ const makeRequest = (endpoint, method, requestData) => {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Content-Length': Buffer.byteLength(requestJSON),
+                'Content-Length': requestJSON ? Buffer.byteLength(requestJSON) : 0,
             }
         }, (response) => {
             let body = '';
@@ -58,7 +58,8 @@ async function testRetrieveBoat() {
     const boatID = response.data[0].id;
     response = await makeRequest(`/boats/${boatID}/`, 'GET');
 
-    assert(response.data.id === boatID);
+    assert(response.data.id === boatID,
+           `Retrieve boat`);
 }
 
 async function testCreateBoat() {
@@ -72,19 +73,19 @@ async function testCreateBoat() {
     const boatId = response.data.id;
     response = await makeRequest('/boats/', 'GET');
 
-    assert(response.data.find(boat => boat.id === boatId) != undefined);
+    assert(response.data.find(boat => boat.id === boatId) != undefined,
+           `Create boat`);
 }
 
 async function testUpdateBoat() {
     var response = await makeRequest('/boats/', 'GET');
     const boat = response.data[0];
-    const updateData = {
-        length: boat.length + 10,
-    };
+    const updateData = Object.assign({}, boat, {length: boat.length + 10});
 
     response = await makeRequest(`/boats/${boat.id}/`, 'PUT', updateData);
 
-    assert(response.data.length === updateData.length);
+    assert(response.data.length === updateData.length,
+           `Update boat`);
 }
 
 async function testDeleteBoat() {
@@ -93,35 +94,83 @@ async function testDeleteBoat() {
     await makeRequest(`/boats/${boatId}/`, 'DELETE');
     response = await makeRequest(`/boats/`, 'GET');
 
-    assert(response.data.find(boat => boat.id === boatId) == undefined);
+    assert(response.data.find(boat => boat.id === boatId) == undefined,
+           `Delete boat`);
 }
 
 async function testSetSailBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const boat = response.data[0];
+    await makeRequest(`/boats/${boat.id}/set_sail/`, 'POST');
+    response = await makeRequest(`/boats/${boat.id}/`, 'GET');
 
+    assert(response.data.at_sea == true,
+           `Set sail boat`);
 }
 
 async function testDockBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const boat = response.data[0];
+    var response = await makeRequest('/slips/', 'GET');
+    const slip = response.data[0];
+    const dockData = {slip_number: slip.number};
 
+    await makeRequest(`/boats/${boat.id}/dock/`, 'POST', dockData);
+    response = await makeRequest(`/boats/${boat.id}/`, 'GET');
+
+    assert(response.data.at_sea == false,
+           `Dock boat`);
 }
 
 async function testListSlips() {
+    const response = await makeRequest('/slips/', 'GET');
 
+    assert(response.data.length > 0,
+           `List slips`);
 }
 
 async function testRetrieveSlip() {
+    var response = await makeRequest('/slips/', 'GET');
+    const slipID = response.data[0].id;
+    response = await makeRequest(`/slips/${slipID}/`, 'GET');
 
+    assert(response.data.id === slipID,
+           `Retrieve slip`);
 }
 
 async function testCreateSlip() {
+    const slipData = {
+        number: 10,
+        arrival_date: "3/13/2007",
+    };
 
+    var response = await makeRequest('/slips/', 'POST', slipData);
+    const slipID = response.data.id;
+    response = await makeRequest('/slips/', 'GET');
+
+    assert(response.data.find(slip => slip.id === slipID) != undefined,
+           `Create slip`);
 }
 
 async function testUpdateSlip() {
+    var response = await makeRequest('/slips/', 'GET');
+    const slip = response.data[0];
+    const updateData = Object.assign({}, slip, {number: slip.number + 10});
 
+    response = await makeRequest(`/slips/${slip.id}/`, 'PUT', updateData);
+
+    assert(response.data.number === updateData.number,
+           `Update slip`);
 }
 
 async function testDeleteSlip() {
+    var response = await makeRequest('/slips/', 'GET');
+    const slipID = response.data[0].id;
+    await makeRequest(`/slips/${slipID}/`, 'DELETE');
+    response = await makeRequest(`/slips/`, 'GET');
 
+    assert(response.data.find(slip => slip.id === slipID) == undefined,
+           `Delete slip`);
 }
 
 
@@ -134,6 +183,13 @@ async function testDeleteSlip() {
     testCreateBoat(),
     testUpdateBoat(),
     testDeleteBoat(),
+    testSetSailBoat(),
+    testDockBoat(),
+    testListSlips(),
+    testRetrieveSlip(),
+    testCreateSlip(),
+    testUpdateSlip(),
+    testDeleteSlip(),
 
 ].reduce((test, next) => {
         console.log(`.`);
