@@ -47,29 +47,97 @@ async function testListBoats() {
     const response = await makeRequest('/boats/', 'GET');
 
     assert(response.data.length > 0,
-           `List boats`);
+        `List boats`);
+}
+
+async function testRetrieveBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const boatId = response.data[0].id;
+
+    response = await makeRequest(`/boats/${boatId}/`, 'GET');
+
+    assert(response.data.id == boatId);
 }
 
 async function testCreateBoat() {
-    const initialLength = await makeRequest('/boats/', 'GET').data.length;
+    var response = await makeRequest('/boats/', 'GET');
+
     const postData = {
         type: "cruiseliner",
         name: "Titanic",
         length: 500,
-        at_sea: true,
     };
 
-    await makeRequest('/boats/', 'POST', postData);
-    const response = await makeRequest('/boats/', 'GET');
+    response = await makeRequest('/boats/', 'POST', postData);
+    console.log(response);
+    const createdBoat = response.data;
+    response = await makeRequest('/boats/', 'GET');
+    const boats = response.data;
 
-    assert(response.data.length > initialLength);
+    assert(boats.find(boat => boat.id === createdBoat.id) != undefined);
+}
+
+async function testUpdateBoat() {
+    var response = await makeRequest('/boats/', 'GET');
+    const initialBoat = response.data[0];
+
+    const updateData = {
+        length: initialBoat.length + 10,
+    };
+
+    await makeRequest(`/boats/${initialBoat.id}/`, 'PUT', updateData);
+    response = makeRequest(`/boats/${initialBoat.id}/`, 'GET');
+
+    assert(response.data.length == initialBoat.length + 10);
+}
+
+async function testDeleteBoat() {
+
+}
+
+async function testSetSailBoat() {
+
+}
+
+async function testDockBoat() {
+
+}
+
+async function testListSlips() {
+
+}
+
+async function testRetrieveSlip() {
+
+}
+
+async function testCreateSlip() {
+
+}
+
+async function testUpdateSlip() {
+
+}
+
+async function testDeleteSlip() {
+
 }
 
 
 // Run all the tests
 [
     testListBoats(),
-    // testCreateBoat(),
+    testRetrieveBoat(),
+    testCreateBoat(),
+    testUpdateBoat(),
+    testDeleteBoat(),
+    testSetSailBoat(),
+    testDockBoat(),
+    testListSlips(),
+    testRetrieveSlip(),
+    testCreateSlip(),
+    testUpdateSlip(),
+    testDeleteSlip(),
 ].reduce((test, next) => {
         console.log(`.`);
 
