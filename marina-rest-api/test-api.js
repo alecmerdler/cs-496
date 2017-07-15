@@ -11,6 +11,8 @@ const assert = require('assert');
  */
 const makeRequest = (endpoint, method, requestData) => {
     return new Promise((resolve, reject) => {
+        const requestJSON = JSON.stringify(requestData);
+
         const request = http.request({
             host: 'localhost',
             port: 8000,
@@ -19,6 +21,7 @@ const makeRequest = (endpoint, method, requestData) => {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'Content-Length': Buffer.byteLength(requestJSON),
             }
         }, (response) => {
             let body = '';
@@ -36,7 +39,7 @@ const makeRequest = (endpoint, method, requestData) => {
         });
 
         if (requestData) {
-            request.write(JSON.stringify(requestData));
+            request.write(requestJSON);
         }
         request.end();
     });
@@ -51,25 +54,24 @@ async function testListBoats() {
 }
 
 async function testCreateBoat() {
-    const initialLength = await makeRequest('/boats/', 'GET').data.length;
     const postData = {
         type: "cruiseliner",
         name: "Titanic",
         length: 500,
-        at_sea: true,
     };
 
-    await makeRequest('/boats/', 'POST', postData);
-    const response = await makeRequest('/boats/', 'GET');
+    var response = await makeRequest('/boats/', 'POST', postData);
+    const boatId = response.data.id;
+    response = await makeRequest('/boats/', 'GET');
 
-    assert(response.data.length > initialLength);
+    assert(response.data.find(boat => boat.id === boatId) != undefined);
 }
 
 
 // Run all the tests
 [
     testListBoats(),
-    // testCreateBoat(),
+    testCreateBoat(),
 ].reduce((test, next) => {
         console.log(`.`);
 
