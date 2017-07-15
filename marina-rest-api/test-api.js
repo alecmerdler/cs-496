@@ -46,6 +46,27 @@ const makeRequest = (endpoint, method, requestData) => {
 };
 
 
+/**
+ * Configure the database with test data.
+ */
+const setup = async () => {
+    const boats = [
+        {name: "Titanic", type: "cruiseliner", length: 200},
+        {name: "Black Pearl", type: "frigate", length: 100},
+        {name: "Tuggy", type: "tugboat", length: 40},
+    ];
+
+    const slips = [
+        {number: 1, arrival_date: "1/1/1111"},
+        {number: 2, arrival_date: "2/2/1212"},
+        {number: 3, arrival_date: "3/3/1313"},
+    ];
+
+    await Promise.all(boats.map(boat => makeRequest('/boats/', 'POST', boat)));
+    await Promise.all(slips.map(slip => makeRequest('/slips/', 'POST', slip)));
+};
+
+
 async function testListBoats() {
     const response = await makeRequest('/boats/', 'GET');
 
@@ -174,29 +195,28 @@ async function testDeleteSlip() {
 }
 
 
+setup().then(_ => {
+    // Run all the tests
+    [
+        testListBoats(),
+        testRetrieveBoat(),
+        testCreateBoat(),
+        testUpdateBoat(),
+        testDeleteBoat(),
+        testSetSailBoat(),
+        testDockBoat(),
+        testListSlips(),
+        testRetrieveSlip(),
+        testCreateSlip(),
+        testUpdateSlip(),
+        testDeleteSlip(),
+    ].reduce((test, next) => {
+            console.log(`.`);
 
-
-// Run all the tests
-[
-    testListBoats(),
-    testRetrieveBoat(),
-    testCreateBoat(),
-    testUpdateBoat(),
-    testDeleteBoat(),
-    testSetSailBoat(),
-    testDockBoat(),
-    testListSlips(),
-    testRetrieveSlip(),
-    testCreateSlip(),
-    testUpdateSlip(),
-    testDeleteSlip(),
-
-].reduce((test, next) => {
-        console.log(`.`);
-
-        return test.then(next);
-    },
-    Promise.resolve())
-    .then(() => {
-        console.log(`All tests passed!`);
+            return test.then(next);
+        },
+        Promise.resolve())
+        .then(() => {
+            console.log(`All tests passed!`);
+        });
     });
