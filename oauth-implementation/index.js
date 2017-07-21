@@ -28,9 +28,12 @@ app.get('/oauth', (req, res) => {
         };
         request.post(`https://www.googleapis.com/oauth2/v4/token`, requestBody, (error, response, body) => {
             console.log(body);
+
+            res.sendFile(path.join(__dirname, 'oauth.html'));
         });
     } else {
-
+        res.status(400)
+           .json({'error': "missing field 'state'"});
     }
 });
 
