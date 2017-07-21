@@ -5,9 +5,51 @@
     </head>
     <body>
         <div>OAuth 2.0 Implementation</div>
+        <oauth-app show-link></oauth-app>
 
-        <a href="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=220231227847-fabrd2a3ogrstjha4ugl60626qp76vmb.apps.googleusercontent.com&redirect_uri=https://eminent-cargo-172005.appspot.com/oauth&scope=email&state=secret123">
-            Click here to authenticate
-        </a>
+    <script>
+        class OAuthAppComponent extends HTMLElement {
+
+            static get observedAttributes() {
+                return ['show-link'];
+            }
+
+            constructor() {
+                super();
+                this.template = this.attachShadow({mode: 'open'});
+                this.render();
+            }
+
+            attributeChangedCallback(attributeName, oldValue, newValue, namespace) {
+                console.log(`${attributeName} changed from ${oldValue} to ${newValue}`);
+                this.render();
+            }
+
+            render() {
+                const link = this.hasAttribute('show-link') ? "<oauth-link></oauth-link>" : "";
+                
+                this.template.innerHTML = `
+                    <div>${link}</div>
+                `;
+            }
+        }
+
+
+        class OauthLinkComponent extends HTMLElement {
+
+            constructor() {
+                super();
+                let shadowRoot = this.attachShadow({mode: 'open'});
+                shadowRoot.innerHTML = `
+                    <a href="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=220231227847-fabrd2a3ogrstjha4ugl60626qp76vmb.apps.googleusercontent.com&redirect_uri=https://eminent-cargo-172005.appspot.com/oauth&scope=email&state=secret123">
+                        Click here to authenticate
+                    </a>
+                `;
+            }
+        }
+
+        customElements.define('oauth-app', OAuthAppComponent);
+        customElements.define('oauth-link', OauthLinkComponent);
+    </script>
     </body>
 </html>

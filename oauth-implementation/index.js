@@ -22,7 +22,7 @@ app.get('/oauth', (req, res) => {
         const requestBody = {
             code: code,
             client_id: `220231227847-fabrd2a3ogrstjha4ugl60626qp76vmb.apps.googleusercontent.com`,
-            client_secret: ``,
+            client_secret: `3N6K3HsSymdDfcaNWmr_p4fV`,
             redirect_uri: ``,
             grant_type: `authorization_code`,
         };
