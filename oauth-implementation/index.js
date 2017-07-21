@@ -23,7 +23,7 @@ app.get('/oauth', (req, res) => {
             code: code,
             client_id: `220231227847-fabrd2a3ogrstjha4ugl60626qp76vmb.apps.googleusercontent.com`,
             client_secret: `3N6K3HsSymdDfcaNWmr_p4fV`,
-            redirect_uri: ``,
+            redirect_uri: `https://${req.headers['host']}/oauth`,
             grant_type: `authorization_code`,
         };
         request.post(`https://www.googleapis.com/oauth2/v4/token`, requestBody, (error, response, body) => {
