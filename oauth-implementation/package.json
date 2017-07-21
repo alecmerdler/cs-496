@@ -1,0 +1,15 @@
+{
+  "name": "oauth-implementation",
+  "version": "1.0.0",
+  "description": "OAuth 2.0 server-side implementation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Alec Merdler",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.3"
+  }
+}
