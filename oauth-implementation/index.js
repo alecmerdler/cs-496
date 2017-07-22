@@ -14,10 +14,10 @@ const credentials = {
     honorCipherOrder: true,
     secureProtocol: 'TLSv1_2_method'
 };
-const oauthState = "secret123";
 const app = express();
 
 let oauthTokenData = null;
+let oauthState = "secret123";
 
 const newOAuthToken = (tokenData) => {
     if (tokenData != undefined) {
@@ -34,11 +34,21 @@ const newOAuthToken = (tokenData) => {
     }
 };
 
+const newOAuthState = () => {
+    return Math.random().toString(36).substring(7);
+};
+
 /**
  * Route definitions.
  */
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/state', (req, res) => {
+    oauthState = newOAuthState();
+
+    res.json({oauthState: oauthState});
 });
 
 app.get('/oauth', (req, res) => {
@@ -79,9 +89,7 @@ app.get('/me', (req, res) => {
             qs: {access_token: oauthTokenData.access_token}
         };
         request(options, (error, response, body) => {
-            console.log(body);
-
-            res.json(body);
+            res.json(Object.assign({}, {oauthState: oauthState}, JSON.parse(body)));
         });
     } else {
         res.status(401)
