@@ -1,0 +1,56 @@
+<html lang="en">
+    <head>
+        <title>OAuth 2.0 Implementation</title>
+        <meta name="description" content="">
+    </head>
+    <body>
+        <div>You have been authenticated!</div>
+
+        <google-plus></google-plus>
+
+        <script>
+            class GooglePlusComponent extends HTMLElement {
+
+                constructor() {
+                    super();
+                    this.googlePlusData = null;
+                    this.template = this.attachShadow({mode: 'open'});
+                    this.render();
+                }
+
+                connectedCallback() {
+                    if (!("fetch" in window)) {
+                        alert("Your browser does not support the 'fetch' API.");
+                    }
+
+                    fetch('/me')
+                        .then(response => response.json())
+                        .then(json => JSON.parse(json))
+                        .then((data) => {
+                            this.googlePlusData = data;
+                            this.render();
+                        });
+                }
+
+                render() {
+                    if (this.googlePlusData != undefined) {
+                        this.template.innerHTML = `
+                            <div style="display: flex; flex-direction: column;">
+                                <div>${this.googlePlusData["name"]["givenName"]} ${this.googlePlusData["name"]["familyName"]}</div>
+                                <a href="${this.googlePlusData['url']}">View Google+ profile</a>
+                            </div>
+                        `;
+                    } else {
+                        this.template.innerHTML = `
+                            <div style="display: flex;">
+                                Loading...
+                            </div>
+                        `;
+                    }
+                }
+            }
+
+            customElements.define('google-plus', GooglePlusComponent);
+        </script>
+    </body>
+</html>

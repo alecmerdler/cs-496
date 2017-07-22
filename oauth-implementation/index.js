@@ -17,6 +17,23 @@ const credentials = {
 const oauthState = "secret123";
 const app = express();
 
+let oauthTokenData = null;
+
+const newOAuthToken = (tokenData) => {
+    if (tokenData != undefined) {
+        console.log(`New OAuth token will expire in ${tokenData.expires_in} seconds`);
+        // Destroy the token once it expires
+        setTimeout(() => {
+            console.log(`Destroying OAuth token`);
+            oauthTokenData = null;
+        }, tokenData.expires_in * 1000);
+
+        return Object.assign({}, tokenData);
+    } else {
+        return null;
+    }
+};
+
 /**
  * Route definitions.
  */
@@ -28,8 +45,6 @@ app.get('/oauth', (req, res) => {
     const state = req.query['state'];
     const code = req.query['code'];
 
-    console.log(state, code);
-
     if (state === oauthState) {
         const requestBody = {
             code: code,
@@ -38,14 +53,39 @@ app.get('/oauth', (req, res) => {
             redirect_uri: `https://${req.headers['host']}/oauth`,
             grant_type: `authorization_code`,
         };
-        request.post(`https://www.googleapis.com/oauth2/v4/token`, requestBody, (error, response, body) => {
-            console.log(body);
+        const options = {
+            method: 'POST',
+            uri: `https://www.googleapis.com/oauth2/v4/token`,
+            form: requestBody,
+        };
+        request(options, (error, response, body) => {
+            const json = JSON.parse(body);
+
+            oauthTokenData = newOAuthToken(json);
 
             res.sendFile(path.join(__dirname, 'oauth.html'));
         });
     } else {
         res.status(400)
            .json({'error': "missing field 'state'"});
+    }
+});
+
+app.get('/me', (req, res) => {
+    if (oauthTokenData != undefined) {
+        const options = {
+            method: 'GET',
+            uri: `https://www.googleapis.com/plus/v1/people/me`,
+            qs: {access_token: oauthTokenData.access_token}
+        };
+        request(options, (error, response, body) => {
+            console.log(body);
+
+            res.json(body);
+        });
+    } else {
+        res.status(401)
+           .json({'error': "please authenticate using OAuth 2.0 endpoint"})
     }
 });
 
