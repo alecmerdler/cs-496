@@ -1,14 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable name="view" type="edu.oregonstate.cs496.merdlera.androidui.main.grid.GridActivity" />
     </data>
     <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:text="Item 1"/>
+        android:layout_height="match_parent"
+        android:columnCount="2"
+        android:rowCount="3">
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[0]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[1]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[2]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[3]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[4]}"/>
     </GridLayout>
 </layout>
