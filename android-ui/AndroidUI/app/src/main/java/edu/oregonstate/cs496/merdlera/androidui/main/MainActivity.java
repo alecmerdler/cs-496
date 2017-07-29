@@ -8,6 +8,8 @@ import android.os.Bundle;
 import edu.oregonstate.cs496.merdlera.androidui.R;
 import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityMainBinding;
 import edu.oregonstate.cs496.merdlera.androidui.main.grid.GridActivity;
+import edu.oregonstate.cs496.merdlera.androidui.main.horizontal.HorizontalActivity;
+import edu.oregonstate.cs496.merdlera.androidui.main.vertical.VerticalActivity;
 
 public class MainActivity extends AppCompatActivity implements Contract.View {
 
@@ -32,12 +34,14 @@ public class MainActivity extends AppCompatActivity implements Contract.View {
 
     @Override
     public void showVerticalList() {
-
+        Intent intent = new Intent(this, VerticalActivity.class);
+        startActivity(intent);
     }
 
     @Override
     public void showHorizontalList() {
-
+        Intent intent = new Intent(this, HorizontalActivity.class);
+        startActivity(intent);
     }
 
     @Override

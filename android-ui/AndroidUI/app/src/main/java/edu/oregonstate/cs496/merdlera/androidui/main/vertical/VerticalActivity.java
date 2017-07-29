@@ -1,4 +1,4 @@
-package edu.oregonstate.cs496.merdlera.androidui.main.grid;
+package edu.oregonstate.cs496.merdlera.androidui.main.vertical;
 
 import android.databinding.BindingAdapter;
 import android.databinding.DataBindingUtil;
@@ -7,13 +7,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 import edu.oregonstate.cs496.merdlera.androidui.R;
-import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityGridBinding;
+import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityVerticalBinding;
 
 /**
- * Created by alec on 7/28/17.
+ * Created by alec on 7/29/17.
  */
 
-public class GridActivity extends AppCompatActivity {
+public class VerticalActivity extends AppCompatActivity {
 
     public String[] imageSources = {
             "http://envyandroid.com/content/images/2015/03/android3.png",
@@ -28,7 +28,7 @@ public class GridActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Set up data binding
-        ActivityGridBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_grid);
+        ActivityVerticalBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_vertical);
         binding.setView(this);
     }
 

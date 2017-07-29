@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable name="view" type="edu.oregonstate.cs496.merdlera.androidui.main.vertical.VerticalActivity" />
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[0]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[1]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[2]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[3]}"/>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:imageURL="@{view.imageSources[4]}"/>
+    </LinearLayout>
+</layout>

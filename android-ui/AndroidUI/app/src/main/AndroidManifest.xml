@@ -21,7 +21,14 @@
         <activity
             android:name=".main.grid.GridActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.vertical.VerticalActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.horizontal.HorizontalActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="landscape" />
     </application>
-
 </manifest>
