@@ -9,6 +9,7 @@ import edu.oregonstate.cs496.merdlera.androidui.R;
 import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityMainBinding;
 import edu.oregonstate.cs496.merdlera.androidui.main.grid.GridActivity;
 import edu.oregonstate.cs496.merdlera.androidui.main.horizontal.HorizontalActivity;
+import edu.oregonstate.cs496.merdlera.androidui.main.infinite.InfiniteActivity;
 import edu.oregonstate.cs496.merdlera.androidui.main.vertical.VerticalActivity;
 
 public class MainActivity extends AppCompatActivity implements Contract.View {
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements Contract.View {
 
     @Override
     public void showInfiniteList() {
-
+        Intent intent = new Intent(this, InfiniteActivity.class);
+        startActivity(intent);
     }
 }
