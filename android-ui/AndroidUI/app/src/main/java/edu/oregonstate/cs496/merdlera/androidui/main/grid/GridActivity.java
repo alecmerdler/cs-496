@@ -1,11 +1,8 @@
 package edu.oregonstate.cs496.merdlera.androidui.main.grid;
 
-import android.databinding.BindingAdapter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ImageView;
-import com.squareup.picasso.Picasso;
 import edu.oregonstate.cs496.merdlera.androidui.R;
 import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityGridBinding;
 
@@ -30,10 +27,5 @@ public class GridActivity extends AppCompatActivity {
         // Set up data binding
         ActivityGridBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_grid);
         binding.setView(this);
-    }
-
-    @BindingAdapter("app:imageURL")
-    public static void loadGridImage(ImageView imageView, String imageURL) {
-        Picasso.with(imageView.getContext()).load(imageURL).into(imageView);
     }
 }
