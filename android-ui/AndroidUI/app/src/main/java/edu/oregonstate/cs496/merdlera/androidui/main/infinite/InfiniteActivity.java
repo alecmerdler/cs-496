@@ -5,13 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-
 import com.github.pwittchen.infinitescroll.library.InfiniteScrollListener;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import edu.oregonstate.cs496.merdlera.androidui.R;
 import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityInfiniteBinding;
 
