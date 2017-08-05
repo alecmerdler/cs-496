@@ -32,30 +32,6 @@ public class LocationActivity extends AppCompatActivity {
     private ListView checkInListView;
     private final int requestLocation = 200;
     private LocationManager locationManager;
-    private String currentLatitude = "";
-    private String currentLongitude = "";
-    private LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            currentLatitude = Double.toString(location.getLatitude());
-            currentLongitude = Double.toString(location.getLongitude());
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +59,7 @@ public class LocationActivity extends AppCompatActivity {
     public void onSubmit(View view) {
         if (newCheckIn.getComment().length() > 0) {
             // Check for location permission
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, requestLocation);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestLocation);
         }
     }
 
@@ -104,11 +80,10 @@ public class LocationActivity extends AppCompatActivity {
         switch (requestCode) {
             case requestLocation: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-
+                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     // Create check-in with current location
-                    newCheckIn.setLatitude(currentLatitude);
-                    newCheckIn.setLongitude(currentLongitude);
+                    newCheckIn.setLatitude(Double.toString(location.getLatitude()));
+                    newCheckIn.setLongitude(Double.toString(location.getLongitude()));
                     createCheckIn(newCheckIn);
                 } else {
                     // Create check-in with default location

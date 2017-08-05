@@ -35,7 +35,11 @@ public class CheckIn extends BaseObservable {
 
     @Bindable
     public String getLatitude() {
-        return latitude;
+        if (latitude.length() >= 7) {
+            return latitude.substring(0, 7);
+        } else {
+            return latitude;
+        }
     }
 
     public void setLatitude(String latitude) {
@@ -45,7 +49,11 @@ public class CheckIn extends BaseObservable {
 
     @Bindable
     public String getLongitude() {
-        return longitude;
+        if (longitude.length() >= 7) {
+            return longitude.substring(0, 7);
+        } else {
+            return longitude;
+        }
     }
 
     public void setLongitude(String longitude) {
