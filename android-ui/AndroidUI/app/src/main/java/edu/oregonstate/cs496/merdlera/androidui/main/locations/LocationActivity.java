@@ -4,6 +4,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +31,31 @@ public class LocationActivity extends AppCompatActivity {
     private CheckInDataSource dataSource;
     private ListView checkInListView;
     private final int requestLocation = 200;
+    private LocationManager locationManager;
+    private String currentLatitude = "";
+    private String currentLongitude = "";
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            currentLatitude = Double.toString(location.getLatitude());
+            currentLongitude = Double.toString(location.getLongitude());
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +68,9 @@ public class LocationActivity extends AppCompatActivity {
         // Initialize data source
         dataSource = new CheckInDataSource(this);
         dataSource.open();
+
+        // Initialize location access
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         // Set up data binding
         ActivityLocationsBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_locations);
@@ -73,7 +104,11 @@ public class LocationActivity extends AppCompatActivity {
         switch (requestCode) {
             case requestLocation: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
                     // Create check-in with current location
+                    newCheckIn.setLatitude(currentLatitude);
+                    newCheckIn.setLongitude(currentLongitude);
                     createCheckIn(newCheckIn);
                 } else {
                     // Create check-in with default location
