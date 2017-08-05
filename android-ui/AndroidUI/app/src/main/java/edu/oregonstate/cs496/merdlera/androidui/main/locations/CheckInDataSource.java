@@ -18,8 +18,12 @@ public class CheckInDataSource {
     // Database fields
     private SQLiteDatabase database;
     private MySQLiteHelper dbHelper;
-    private String[] allColumns = { MySQLiteHelper.COLUMN_ID,
-            MySQLiteHelper.COLUMN_COMMENT };
+    private String[] allColumns = {
+            MySQLiteHelper.COLUMN_ID,
+            MySQLiteHelper.COLUMN_COMMENT,
+            MySQLiteHelper.COLUMN_LATITUDE,
+            MySQLiteHelper.COLUMN_LONGITUDE
+    };
 
     public CheckInDataSource(Context context) {
         dbHelper = new MySQLiteHelper(context);
@@ -36,6 +40,8 @@ public class CheckInDataSource {
     public CheckIn createCheckIn(CheckIn checkIn) {
         ContentValues values = new ContentValues();
         values.put(MySQLiteHelper.COLUMN_COMMENT, checkIn.getComment());
+        values.put(MySQLiteHelper.COLUMN_LATITUDE, checkIn.getLatitude());
+        values.put(MySQLiteHelper.COLUMN_LONGITUDE, checkIn.getLongitude());
         long insertId = database.insert(MySQLiteHelper.TABLE_COMMENTS, null, values);
         Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS,
                                        allColumns,
@@ -55,7 +61,7 @@ public class CheckInDataSource {
     }
 
     public List<CheckIn> getAllCheckIns() {
-        List<CheckIn> comments = new ArrayList<CheckIn>();
+        List<CheckIn> comments = new ArrayList<>();
 
         Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS, allColumns, null, null, null, null, null);
 
@@ -75,6 +81,8 @@ public class CheckInDataSource {
         CheckIn checkIn = new CheckIn();
         checkIn.setId(cursor.getLong(0));
         checkIn.setComment(cursor.getString(1));
+        checkIn.setLatitude(cursor.getString(2));
+        checkIn.setLongitude(cursor.getString(3));
 
         return checkIn;
     }

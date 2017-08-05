@@ -4,12 +4,23 @@
         <variable name="checkIn" type="edu.oregonstate.cs496.merdlera.androidui.main.locations.CheckIn"></variable>
     </data>
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight=".33"
             android:layout_height="wrap_content"
             android:text="@{checkIn.comment}" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight=".33"
+            android:layout_height="wrap_content"
+            android:text="@{checkIn.latitude}" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight=".33"
+            android:layout_height="wrap_content"
+            android:text="@{checkIn.longitude}" />
     </LinearLayout>
 </layout>
