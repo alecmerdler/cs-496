@@ -2,8 +2,8 @@ package edu.oregonstate.cs496.merdlera.androidui.main.locations;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import edu.oregonstate.cs496.merdlera.androidui.R;
 import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityLocationsBinding;
 
@@ -14,13 +14,7 @@ import edu.oregonstate.cs496.merdlera.androidui.databinding.ActivityLocationsBin
 public class LocationActivity extends AppCompatActivity {
 
     private CheckIn newCheckIn;
-
-
-    // TODO: Move database logic out of activity
-    private static class CheckInEntry implements BaseColumns {
-        public static final String TABLE_NAME = "check_in";
-        public static final String COLUMN_NAME_MESSAGE = "message";
-    }
+    private CheckInDataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +22,29 @@ public class LocationActivity extends AppCompatActivity {
 
         newCheckIn = new CheckIn();
 
+        dataSource = new CheckInDataSource(this);
+        dataSource.open();
+
         // Set up data binding
         ActivityLocationsBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_locations);
-
         binding.setNewCheckIn(newCheckIn);
+    }
+
+    public void onSubmit(View view) {
+        if (newCheckIn.getComment().length() > 0) {
+            dataSource.createCheckIn(newCheckIn.getComment());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        dataSource.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        dataSource.close();
+        super.onPause();
     }
 }

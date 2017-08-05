@@ -27,5 +27,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="@{() -> presenter.onShowInfiniteList()}" />
+        <Button
+            android:text="Locations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> presenter.onShowLocations()}" />
     </LinearLayout>
 </layout>

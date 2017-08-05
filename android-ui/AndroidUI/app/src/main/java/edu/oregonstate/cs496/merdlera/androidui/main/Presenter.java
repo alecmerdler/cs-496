@@ -31,4 +31,9 @@ public class Presenter implements Contract.Presenter {
     public void onShowInfiniteList() {
         view.showInfiniteList();
     }
+
+    @Override
+    public void onShowLocations() {
+        view.showLocations();
+    }
 }

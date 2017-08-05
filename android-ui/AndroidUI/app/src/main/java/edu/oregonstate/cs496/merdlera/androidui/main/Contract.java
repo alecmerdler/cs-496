@@ -15,6 +15,8 @@ public interface Contract {
         void showHorizontalList();
 
         void showInfiniteList();
+
+        void showLocations();
     }
 
     interface Presenter {
@@ -26,5 +28,7 @@ public interface Contract {
         void onShowHorizontalList();
 
         void onShowInfiniteList();
+
+        void onShowLocations();
     }
 }
