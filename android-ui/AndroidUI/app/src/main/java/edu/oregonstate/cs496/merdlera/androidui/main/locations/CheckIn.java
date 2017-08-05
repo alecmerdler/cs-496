@@ -11,7 +11,7 @@ import edu.oregonstate.cs496.merdlera.androidui.BR;
 public class CheckIn extends BaseObservable {
 
     private long id;
-    private String comment;
+    private String comment = "";
 
     public long getId() {
         return id;

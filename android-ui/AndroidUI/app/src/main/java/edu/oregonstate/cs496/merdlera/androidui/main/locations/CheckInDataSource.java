@@ -33,32 +33,31 @@ public class CheckInDataSource {
         dbHelper.close();
     }
 
-    public CheckIn createCheckIn(String comment) {
+    public CheckIn createCheckIn(CheckIn checkIn) {
         ContentValues values = new ContentValues();
-        values.put(MySQLiteHelper.COLUMN_COMMENT, comment);
-        long insertId = database.insert(MySQLiteHelper.TABLE_COMMENTS, null,
-                values);
+        values.put(MySQLiteHelper.COLUMN_COMMENT, checkIn.getComment());
+        long insertId = database.insert(MySQLiteHelper.TABLE_COMMENTS, null, values);
         Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS,
-                allColumns, MySQLiteHelper.COLUMN_ID + " = " + insertId, null,
-                null, null, null);
+                                       allColumns,
+                                       MySQLiteHelper.COLUMN_ID + " = " + insertId,
+                                       null, null, null, null);
         cursor.moveToFirst();
         CheckIn newCheckIn = cursorToCheckIn(cursor);
         cursor.close();
+
         return newCheckIn;
     }
 
     public void deleteCheckIn(CheckIn checkIn) {
         long id = checkIn.getId();
         System.out.println("CheckIn deleted with id: " + id);
-        database.delete(MySQLiteHelper.TABLE_COMMENTS, MySQLiteHelper.COLUMN_ID
-                + " = " + id, null);
+        database.delete(MySQLiteHelper.TABLE_COMMENTS, MySQLiteHelper.COLUMN_ID + " = " + id, null);
     }
 
     public List<CheckIn> getAllCheckIns() {
         List<CheckIn> comments = new ArrayList<CheckIn>();
 
-        Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS,
-                allColumns, null, null, null, null, null);
+        Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS, allColumns, null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -68,6 +67,7 @@ public class CheckInDataSource {
         }
         // make sure to close the cursor
         cursor.close();
+
         return comments;
     }
 
@@ -75,6 +75,7 @@ public class CheckInDataSource {
         CheckIn checkIn = new CheckIn();
         checkIn.setId(cursor.getLong(0));
         checkIn.setComment(cursor.getString(1));
+
         return checkIn;
     }
 }
