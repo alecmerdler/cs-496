@@ -5,31 +5,64 @@
         <variable name="currentUser" type="edu.oregonstate.cs496.merdlera.androidoauth.MainActivity.CurrentUser" />
         <variable name="authorize" type="android.view.View.OnClickListener" />
         <variable name="signOut" type="android.view.View.OnClickListener" />
+        <variable name="sharePost" type="android.view.View.OnClickListener" />
+        <variable name="newPost" type="String" />
     </data>
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/sign_in_button"
-            android:text="Sign In"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="@{currentUser != null ? View.GONE : View.VISIBLE}"
-            android:onClick="@{authorize}"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:text="Sign In"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{currentUser != null ? View.GONE : View.VISIBLE}"
+                android:onClick="@{authorize}"/>
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign Out"
+                android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
+                android:onClick="@{signOut}"/>
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
+                android:text="@{currentUser.displayName}" />
+        </LinearLayout>
+        <!-- FIXME: Causing exception -->
+        <!--<EditText-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@={newPost}" />-->
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign Out"
-            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
-            android:onClick="@{signOut}"/>
-
+            android:onClick="@{sharePost}"
+            android:text="Share" />
         <TextView
-            android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
-            android:text="@{currentUser.displayName}" />
+            android:visibility="@{(currentUser != null &amp;&amp; currentUser.posts.size() > 0) ? View.VISIBLE : View.GONE}"
+            android:text="@{currentUser.posts[0]}" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{(currentUser != null &amp;&amp; currentUser.posts.size() > 1) ? View.VISIBLE : View.GONE}"
+            android:text="@{currentUser.posts[1]}" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{(currentUser != null &amp;&amp; currentUser.posts.size() > 2) ? View.VISIBLE : View.GONE}"
+            android:text="@{currentUser.posts[2]}" />
     </LinearLayout>
 </layout>
 
