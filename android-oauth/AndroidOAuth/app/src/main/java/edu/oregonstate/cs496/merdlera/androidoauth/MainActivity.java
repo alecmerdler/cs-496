@@ -2,14 +2,14 @@ package edu.oregonstate.cs496.merdlera.androidoauth;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.databinding.BaseObservable;
+import android.databinding.Bindable;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.widget.TextView;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
@@ -21,8 +21,7 @@ public class MainActivity extends Activity {
     private GoogleApiClient googleApiClient;
 
     private ActivityMainBinding binding;
-    private String userDisplayName;
-    private boolean signingOut = false;
+    private CurrentUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +42,7 @@ public class MainActivity extends Activity {
 
         // Set up data binding
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        binding.setUserDisplayName(this.userDisplayName);
+        binding.setCurrentUser(this.currentUser);
         binding.setAuthorize((view) -> this.authorizePlusDomainsAccess());
         binding.setSignOut((view) -> this.signOut());
     }
@@ -54,15 +53,13 @@ public class MainActivity extends Activity {
     }
 
     private void signOut() {
-        signingOut = true;
         new Thread(() -> {
-            ConnectionResult connectionResult = googleApiClient.blockingConnect();
+            googleApiClient.blockingConnect();
 
             Auth.GoogleSignInApi.signOut(googleApiClient)
                     .setResultCallback((Status signOutStatus) -> {
-                        userDisplayName = null;
-                        ((TextView) findViewById(R.id.user_name)).setText("");
-                        signingOut = false;
+                        currentUser = null;
+                        binding.setCurrentUser(currentUser);
 
                         Auth.GoogleSignInApi.revokeAccess(googleApiClient)
                                 .setResultCallback((Status revokeAccessStatus) -> {});
@@ -78,14 +75,27 @@ public class MainActivity extends Activity {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 GoogleSignInAccount account = result.getSignInAccount();
-                ((TextView) findViewById(R.id.user_name)).setText(account.getDisplayName());
-//                userDisplayName = account.getDisplayName();
-//                binding.notifyPropertyChanged(BR._all);
+//                ((TextView) findViewById(R.id.user_name)).setText(account.getDisplayName());
+                currentUser = new CurrentUser();
+                currentUser.setDisplayName(account.getDisplayName());
+                binding.setCurrentUser(currentUser);
             }
         }
     }
 
     private void listPosts() {
 
+    }
+
+    public class CurrentUser extends BaseObservable {
+        private String displayName;
+        @Bindable
+        public String getDisplayName() {
+            return this.displayName;
+        }
+        public void setDisplayName(String displayName) {
+            this.displayName = displayName;
+            notifyPropertyChanged(BR.displayName);
+        }
     }
 }

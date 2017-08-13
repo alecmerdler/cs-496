@@ -2,7 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <import type="android.view.View" />
-        <variable name="userDisplayName" type="String" />
+        <variable name="currentUser" type="edu.oregonstate.cs496.merdlera.androidoauth.MainActivity.CurrentUser" />
         <variable name="authorize" type="android.view.View.OnClickListener" />
         <variable name="signOut" type="android.view.View.OnClickListener" />
     </data>
@@ -14,19 +14,22 @@
             android:text="Sign In"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="@{currentUser != null ? View.GONE : View.VISIBLE}"
             android:onClick="@{authorize}"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sign Out"
+            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
             android:onClick="@{signOut}"/>
 
         <TextView
             android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{userDisplayName}" />
+            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
+            android:text="@{currentUser.displayName}" />
     </LinearLayout>
 </layout>
 
