@@ -6,6 +6,8 @@
         <variable name="authorize" type="android.view.View.OnClickListener" />
         <variable name="signOut" type="android.view.View.OnClickListener" />
         <variable name="sharePost" type="android.view.View.OnClickListener" />
+        <variable name="refreshPosts" type="android.view.View.OnClickListener" />
+        <variable name="updatePost" type="android.text.TextWatcher" />
         <variable name="newPost" type="String" />
     </data>
     <LinearLayout
@@ -38,31 +40,40 @@
                 android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
                 android:text="@{currentUser.displayName}" />
         </LinearLayout>
-        <!-- FIXME: Causing exception -->
-        <!--<EditText-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@={newPost}" />-->
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
+            android:text="@{newPost}"
+            android:addTextChangedListener="@{updatePost}"
+            android:hint="Enter message" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="@{sharePost}"
+            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
             android:text="Share" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{refreshPosts}"
+            android:visibility="@{currentUser != null ? View.VISIBLE : View.GONE}"
+            android:text="Refresh" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="@{(currentUser != null &amp;&amp; currentUser.posts.size() > 0) ? View.VISIBLE : View.GONE}"
-            android:text="@{currentUser.posts[0]}" />
+            android:text="@{`1. ` + currentUser.posts[0]}" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="@{(currentUser != null &amp;&amp; currentUser.posts.size() > 1) ? View.VISIBLE : View.GONE}"
-            android:text="@{currentUser.posts[1]}" />
+            android:text="@{`2. ` + currentUser.posts[1]}" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="@{(currentUser != null &amp;&amp; currentUser.posts.size() > 2) ? View.VISIBLE : View.GONE}"
-            android:text="@{currentUser.posts[2]}" />
+            android:text="@{`3. ` + currentUser.posts[2]}" />
     </LinearLayout>
 </layout>
 

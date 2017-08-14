@@ -6,6 +6,8 @@ import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -24,12 +26,17 @@ import edu.oregonstate.cs496.merdlera.androidoauth.databinding.ActivityMainBindi
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends android.app.Activity {
 
     private static int AUTHORIZE_DOMAINS = 123;
+    private String[] scopes = {
+            "https://www.googleapis.com/auth/plus.me",
+            "https://www.googleapis.com/auth/plus.stream.read",
+            "https://www.googleapis.com/auth/plus.stream.write"
+    };
     private GoogleApiClient googleApiClient;
     private Account account;
     private PlusDomains plusDomains;
@@ -46,9 +53,9 @@ public class MainActivity extends android.app.Activity {
         // Set up Google API client
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestScopes(new Scope("https://www.googleapis.com/auth/plus.me"))
-                .requestScopes(new Scope("https://www.googleapis.com/auth/plus.stream.read"))
-                .requestScopes(new Scope("https://www.googleapis.com/auth/plus.stream.write"))
+                .requestScopes(new Scope(scopes[0]))
+                .requestScopes(new Scope(scopes[1]))
+                .requestScopes(new Scope(scopes[2]))
                 .build();
 
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -61,7 +68,26 @@ public class MainActivity extends android.app.Activity {
         binding.setNewPost(newPost);
         binding.setAuthorize((view) -> this.authorizePlusDomainsAccess());
         binding.setSignOut((view) -> this.signOut());
-        binding.setSharePost((view) -> new Thread(() -> createPost(newPost)));
+        binding.setUpdatePost(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                newPost = charSequence.toString();
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        binding.setSharePost((view) -> {
+            new Thread(() -> createPost(newPost)).start();
+        });
+        binding.setRefreshPosts((view) -> {
+            new Thread(() -> listPosts()).start();
+        });
     }
 
     private void authorizePlusDomainsAccess() {
@@ -92,10 +118,7 @@ public class MainActivity extends android.app.Activity {
             if (result.isSuccess()) {
                 GoogleSignInAccount googleSignInAccount = result.getSignInAccount();
                 account = googleSignInAccount.getAccount();
-                GoogleAccountCredential credential =
-                        GoogleAccountCredential.usingOAuth2(
-                                MainActivity.this,
-                                Collections.singleton("https://www.googleapis.com/auth/contacts.readonly"));
+                GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(MainActivity.this, new ArrayList<>(Arrays.asList(scopes)));
                 credential.setSelectedAccount(account);
                 plusDomains = new PlusDomains.Builder(AndroidHttp.newCompatibleTransport(),
                                                       JacksonFactory.getDefaultInstance(),
@@ -117,8 +140,10 @@ public class MainActivity extends android.app.Activity {
                 posts.add(activity.getObject().getContent());
             }
             currentUser.setPosts(posts);
+            binding.setCurrentUser(currentUser);
+            System.out.println(currentUser.getPosts().get(0));
         } catch (IOException ioe) {
-
+            System.out.println(ioe.getMessage());
         }
     }
 
@@ -135,7 +160,7 @@ public class MainActivity extends android.app.Activity {
             Activity activity = new Activity().setObject(new Activity.PlusDomainsObject().setOriginalContent(message)).setAccess(acl);
             plusDomains.activities().insert("me", activity).execute();
         } catch (IOException ioe) {
-
+            System.out.println(ioe.getMessage());
         }
     }
 
