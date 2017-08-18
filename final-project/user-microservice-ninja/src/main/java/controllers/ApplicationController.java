@@ -24,6 +24,7 @@ import com.google.api.services.plus.model.Person;
 import com.google.api.services.tasks.Tasks;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import models.Message;
 import models.User;
 import ninja.Context;
 import ninja.Result;
@@ -32,6 +33,7 @@ import ninja.params.Header;
 import ninja.params.Param;
 import ninja.params.PathParam;
 import org.hibernate.service.spi.ServiceException;
+import services.MessageService;
 import services.UserService;
 
 import java.io.IOException;
@@ -44,10 +46,12 @@ import static ninja.Results.json;
 public class ApplicationController {
 
     private final UserService userService;
+    private final MessageService messageService;
 
     @Inject
-    public ApplicationController(UserService userService) {
+    public ApplicationController(UserService userService, MessageService messageService) {
         this.userService = userService;
+        this.messageService = messageService;
     }
 
     public Result initialize(Context context, Map<String, Object> options) {
@@ -101,6 +105,7 @@ public class ApplicationController {
             Optional<User> userOptional = userService.createUser(user);
             if (userOptional.isPresent()) {
                 createdUser = userOptional.get();
+                messageService.publish(new Message("users", createdUser.getId(), "create", user.mapProperties(), user.mapProperties()));
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -135,6 +140,7 @@ public class ApplicationController {
             Optional<User> userOptional = userService.updateUser(user);
             if (userOptional.isPresent()) {
                 updatedUser = userOptional.get();
+                messageService.publish(new Message("users", id, "update", user.mapProperties(), user.mapProperties()));
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -154,6 +160,7 @@ public class ApplicationController {
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
                 userService.destroyUser(user);
+                messageService.publish(new Message("users", user.getId(), "destroy"));
                 response = json()
                         .status(204)
                         .render(new HashMap<>());
