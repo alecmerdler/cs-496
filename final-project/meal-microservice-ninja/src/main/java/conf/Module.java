@@ -20,16 +20,18 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.mashape.unirest.http.Unirest;
-import dao.UserDao;
-import dao.UserDaoImpl;
+import dao.MealDao;
+import dao.MealDaoImpl;
+import dao.TagDao;
+import dao.TagDaoImpl;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import services.MealService;
+import services.MealServiceImpl;
 import services.MessageService;
 import services.MessageServiceMQTT;
-import services.UserService;
-import services.UserServiceImpl;
 import utils.UnirestObjectMapper;
 
 import java.util.UUID;
@@ -41,9 +43,10 @@ public class Module extends AbstractModule {
     protected void configure() {
         Unirest.setObjectMapper(new UnirestObjectMapper());
 
-        bind(UserDao.class).to(UserDaoImpl.class);
-        bind(UserService.class).to(UserServiceImpl.class);
+        bind(MealDao.class).to(MealDaoImpl.class);
+        bind(TagDao.class).to(TagDaoImpl.class);
         bind(MessageService.class).to(MessageServiceMQTT.class);
+        bind(MealService.class).to(MealServiceImpl.class);
     }
 
     @Provides

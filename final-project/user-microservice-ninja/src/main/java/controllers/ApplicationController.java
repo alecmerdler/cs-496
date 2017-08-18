@@ -106,11 +106,9 @@ public class ApplicationController {
             throw new BadRequestException(e.getMessage());
         }
 
-        return json().render(response);
-
-//        return json()
-//                .status(201)
-//                .render(createdUser);
+        return json()
+                .status(201)
+                .render(createdUser);
     }
 
     public Result retrieveUser(@PathParam("id") Long id) {
