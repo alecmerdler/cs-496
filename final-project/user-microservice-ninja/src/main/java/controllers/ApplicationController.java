@@ -18,16 +18,14 @@ package controllers;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import models.Message;
 import models.User;
 import ninja.Context;
 import ninja.Result;
 import ninja.exceptions.BadRequestException;
+import ninja.params.Header;
 import ninja.params.Param;
 import ninja.params.PathParam;
 import org.hibernate.service.spi.ServiceException;
-import rx.schedulers.Schedulers;
-import services.MessageService;
 import services.UserService;
 
 import java.util.*;
@@ -39,12 +37,10 @@ import static ninja.Results.json;
 public class ApplicationController {
 
     private final UserService userService;
-    private final MessageService messageService;
 
     @Inject
-    public ApplicationController(UserService userService, MessageService messageService) {
+    public ApplicationController(UserService userService) {
         this.userService = userService;
-        this.messageService = messageService;
     }
 
     public Result initialize(Context context, Map<String, Object> options) {
@@ -54,21 +50,6 @@ public class ApplicationController {
         return json()
                 .status(200)
                 .render(response);
-    }
-
-    public Result listMessages() {
-        final List<Message> messages = new ArrayList<>();
-        try {
-            messageService.getMessages()
-                    .subscribeOn(Schedulers.newThread())
-                    .subscribe(messages::addAll);
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
-
-        return json()
-                .status(200)
-                .render(messages);
     }
 
     public Result listUsers(@Param("username") String username) {
@@ -95,7 +76,6 @@ public class ApplicationController {
             Optional<User> userOptional = userService.createUser(user);
             if (userOptional.isPresent()) {
                 createdUser = userOptional.get();
-                messageService.publish(new Message("users", createdUser.getId(), "create", user.mapProperties(), user.mapProperties()));
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -130,7 +110,6 @@ public class ApplicationController {
             Optional<User> userOptional = userService.updateUser(user);
             if (userOptional.isPresent()) {
                 updatedUser = userOptional.get();
-                messageService.publish(new Message("users", id, "update", user.mapProperties(), user.mapProperties()));
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -150,7 +129,6 @@ public class ApplicationController {
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
                 userService.destroyUser(user);
-                messageService.publish(new Message("users", user.getId(), "destroy"));
                 response = json()
                         .status(204)
                         .render(new HashMap<>());
@@ -160,5 +138,28 @@ public class ApplicationController {
         }
 
         return response;
+    }
+
+    public Result authenticate(@Header("authorization") String authToken) {
+        Map<String, Object> response = new HashMap<>();
+        int statusCode = 200;
+
+        if (authToken == null) {
+            response.put("error", "missing 'Authorization' header");
+            statusCode = 401;
+        }
+        else if (authToken.indexOf("Bearer") != 0) {
+            response.put("error", "missing 'Bearer' in 'Authorization' header");
+            statusCode = 401;
+        }
+        else {
+            String accessToken = authToken.replace("Bearer ", "");
+            response.put("token", accessToken);
+//            GoogleCredential credential = new GoogleCredential().setAccessToken()
+        }
+
+        return json()
+                .status(statusCode)
+                .render(response);
     }
 }
