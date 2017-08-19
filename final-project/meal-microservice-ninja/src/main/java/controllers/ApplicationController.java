@@ -124,7 +124,6 @@ public class ApplicationController {
             if (mealOptional.isPresent()) {
                 createdMeal = mealOptional.get();
                 messageService.publish(new Message("meals", createdMeal.getId(), "create"));
-                response = createdMeal.mapProperties();
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -136,7 +135,7 @@ public class ApplicationController {
                 .setApplicationName("CS496-Final/1.0")
                 .build();
         try {
-            String taskList = tasksService.tasklists().list()
+            String taskListId = tasksService.tasklists().list()
                     .setMaxResults(Long.valueOf(10))
                     .execute()
                     .getItems()
@@ -145,7 +144,11 @@ public class ApplicationController {
             Task newTask = new Task()
                     .setTitle(createdMeal.getMealName())
                     .setNotes(createdMeal.getDescription());
-            Task createdTask = tasksService.tasks().insert(taskList, newTask).execute();
+            Task createdTask = tasksService.tasks().insert(taskListId, newTask).execute();
+            createdMeal.setTaskId(createdTask.getId());
+            createdMeal.setTaskListId(taskListId);
+            createdMeal = mealService.updateMeal(createdMeal).get();
+            response = createdMeal.mapProperties();
             response.put("task", createdTask);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
@@ -156,23 +159,38 @@ public class ApplicationController {
                 .render(response);
     }
 
-    public Result retrieveMeal(@PathParam("id") Long id,
+    @FilterWith(SecureFilter.class)
+    public Result retrieveMeal(Context context,
+                               @PathParam("id") Long id,
                                @Param("fields") String[] fields) {
-        Result response = json()
-                .status(404)
-                .render(new HashMap<>());
+        Map<String, Object> response = new HashMap<>();
+
         try {
             Optional<Meal> mealOptional = mealService.retrieveMealById(id);
-            if (mealOptional.isPresent()) {
-                response = json()
-                        .status(200)
-                        .render(mealOptional.get());
+            if (!mealOptional.isPresent()) {
+                return json()
+                        .status(404);
+            }
+
+            // Retrieve Google Task
+            Credential credential = (Credential) context.getAttribute("oauthCredential");
+            Tasks tasksService = new Tasks.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
+                    .setApplicationName("CS496-Final/1.0")
+                    .build();
+            try {
+                response = mealOptional.get().mapProperties();
+                Task task = tasksService.tasks().get(mealOptional.get().getTaskListId(), mealOptional.get().getTaskId()).execute();
+                response.put("task", task);
+            } catch (Exception e) {
+                throw new BadRequestException(e.getMessage());
             }
         } catch (ServiceException se) {
             throw new BadRequestException(se.getMessage());
         }
 
-        return response;
+        return json()
+                .status(200)
+                .render(response);
     }
 
     @FilterWith(SecureFilter.class)

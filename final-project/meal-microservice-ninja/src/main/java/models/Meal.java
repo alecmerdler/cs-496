@@ -22,8 +22,11 @@ public class Meal extends Model {
     @Column()
     private String description;
 
-    @Column(nullable = false)
-    private int price;
+    @Column()
+    private String taskId;
+
+    @Column()
+    private String taskListId;
 
     @ManyToMany(cascade = CascadeType.ALL,
                 fetch = FetchType.EAGER)
@@ -95,12 +98,20 @@ public class Meal extends Model {
         this.description = description;
     }
 
-    public int getPrice() {
-        return price;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setPrice(int price) {
-        this.price = price;
+    public String getTaskListId() {
+        return taskListId;
+    }
+
+    public void setTaskListId(String taskListId) {
+        this.taskListId = taskListId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public List<Tag> getTags() {

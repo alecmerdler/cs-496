@@ -14,22 +14,20 @@ import org.codehaus.jackson.type.TypeReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import rx.Observable;
 import services.MessageService;
 import utils.UnirestObjectMapper;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Created by alec on 10/25/16.
  */
 public class MealIntegrationTest extends NinjaTest {
 
-    final String oauthToken = "ya29.GlusBNEG7IjuczuVD3UvdeGt3tw1Ry3QiN8mAXjywotO-oeGAbTWZaz8hqWSY8rPFz8dlcA8jTbPsqSR3JPD6onLuPzUWnfOGRp6RFsB4eqgmoYbGeVgZ6QZDbpB";
+    final String oauthToken = "ya29.GlusBOwsnQPUXqntKuYLLZ9qPDyZCIan63-ol9XZrGvMNTU3WpSEawjYGByHlboggIqnCPZ-S8iZrLTryAQl6wOJUhdzWd8HyBOtlI0stE46XJXe1m9IxWDcS-HZ";
 
     ObjectMapper objectMapper;
     MessageService messageService;
@@ -93,6 +91,7 @@ public class MealIntegrationTest extends NinjaTest {
             messageService.publish(new Message("users", chefId, "destroy"));
             Thread.sleep(100);
             HttpResponse<JsonNode> response = Unirest.get(mealsUrl)
+                    .header("Authorization", "Bearer " + oauthToken)
                     .asJson();
             List<Meal> meals = objectMapper.readValue(response.getBody().toString(), new TypeReference<List<Meal>>(){});
 
