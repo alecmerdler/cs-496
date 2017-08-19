@@ -1,12 +1,19 @@
 package controllers;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.tasks.Tasks;
+import com.google.api.services.tasks.model.Task;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import dao.MealDao;
 import dao.TagDao;
+import filters.SecureFilter;
 import models.Meal;
 import models.Message;
 import ninja.Context;
+import ninja.FilterWith;
 import ninja.Result;
 import ninja.exceptions.BadRequestException;
 import ninja.params.Param;
@@ -106,21 +113,47 @@ public class ApplicationController {
                 .render(allMeals);
     }
 
+    @FilterWith(SecureFilter.class)
     public Result createMeal(Context context, Meal meal) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Create Meal in database
         Meal createdMeal = null;
         try {
             Optional<Meal> mealOptional = mealService.createMeal(meal);
             if (mealOptional.isPresent()) {
                 createdMeal = mealOptional.get();
                 messageService.publish(new Message("meals", createdMeal.getId(), "create"));
+                response = createdMeal.mapProperties();
             }
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+
+        // Create Google Task
+        Credential credential = (Credential) context.getAttribute("oauthCredential");
+        Tasks tasksService = new Tasks.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
+                .setApplicationName("CS496-Final/1.0")
+                .build();
+        try {
+            String taskList = tasksService.tasklists().list()
+                    .setMaxResults(Long.valueOf(10))
+                    .execute()
+                    .getItems()
+                    .get(0)
+                    .getId();
+            Task newTask = new Task()
+                    .setTitle(createdMeal.getMealName())
+                    .setNotes(createdMeal.getDescription());
+            Task createdTask = tasksService.tasks().insert(taskList, newTask).execute();
+            response.put("task", createdTask);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
 
         return json()
                 .status(201)
-                .render(createdMeal);
+                .render(response);
     }
 
     public Result retrieveMeal(@PathParam("id") Long id,
@@ -142,6 +175,7 @@ public class ApplicationController {
         return response;
     }
 
+    @FilterWith(SecureFilter.class)
     public Result updateMeal(@PathParam("id") Long id, Context context, Meal meal) {
         Meal updatedMeal = null;
         try {
@@ -159,6 +193,7 @@ public class ApplicationController {
                 .render(updatedMeal);
     }
 
+    @FilterWith(SecureFilter.class)
     public Result destroyMeal(@PathParam("id") Long id) {
         Result response = json()
                 .status(404)
@@ -171,39 +206,6 @@ public class ApplicationController {
                 response = json()
                         .status(204)
                         .render(new HashMap<>());
-            }
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
-
-        return response;
-    }
-
-    // TODO: Define request body
-    public Result purchaseMeal(@PathParam("id") Long id, Context context, Map<String, Object> requestBody) {
-        Map<String, Object> responseBody = new HashMap<>();
-        Result response = json()
-                .status(404)
-                .render(responseBody);
-        try {
-            Optional<Meal> mealOptional = mealService.retrieveMealById(id);
-            if (mealOptional.isPresent()) {
-
-                Map<String, Object> messageState = new HashMap<>();
-                messageState.put("userId", requestBody.get("userId"));
-                messageService.request("purchases", new Message("meals", id, "purchase", messageState, mealOptional.get().mapProperties()))
-                        .subscribeOn(Schedulers.newThread())
-                        .subscribe((Message message) -> {
-                            if (message.getAction().equals("create") && Long.valueOf((int) message.getState().get("mealId")).equals(id)) {
-                                responseBody.put("purchaseId", message.getResourceId());
-                                responseBody.put("status", "purchase created");
-                            }
-                        });
-                // FIXME: Wait until message response received to send HTTP response
-                Thread.sleep(2000);
-                response = json()
-                        .status(200)
-                        .render(responseBody);
             }
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());

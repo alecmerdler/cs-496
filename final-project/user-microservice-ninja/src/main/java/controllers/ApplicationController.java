@@ -16,12 +16,6 @@
 
 package controllers;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.plus.Plus;
-import com.google.api.services.plus.model.Person;
-import com.google.api.services.tasks.Tasks;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import models.Message;
@@ -29,14 +23,12 @@ import models.User;
 import ninja.Context;
 import ninja.Result;
 import ninja.exceptions.BadRequestException;
-import ninja.params.Header;
 import ninja.params.Param;
 import ninja.params.PathParam;
 import org.hibernate.service.spi.ServiceException;
 import services.MessageService;
 import services.UserService;
 
-import java.io.IOException;
 import java.util.*;
 
 import static ninja.Results.json;
@@ -81,25 +73,7 @@ public class ApplicationController {
                 .render(users);
     }
 
-    public Result createUser(Context context, User user,
-                             @Header("authorization") String authToken) {
-        Map<String, Object> response = new HashMap<>();
-        int statusCode = 200;
-
-        if (authToken == null) {
-            throw new BadRequestException("missing 'Authorization' header");
-        }
-        else if (authToken.indexOf("Bearer") != 0) {
-            throw new BadRequestException("missing 'Bearer' in 'Authorization' header");
-        }
-        else {
-            GoogleCredential credential = new GoogleCredential().setAccessToken(authToken.replace("Bearer ", ""));
-
-            Tasks tasks = new Tasks.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
-                    .setApplicationName("CS496-Final/1.0")
-                    .build();
-        }
-
+    public Result createUser(Context context, User user) {
         User createdUser = null;
         try {
             Optional<User> userOptional = userService.createUser(user);
@@ -170,37 +144,5 @@ public class ApplicationController {
         }
 
         return response;
-    }
-
-    public Result authenticate(@Header("authorization") String authToken) {
-        Map<String, Object> response = new HashMap<>();
-        int statusCode = 200;
-
-        if (authToken == null) {
-            response.put("error", "missing 'Authorization' header");
-            statusCode = 401;
-        }
-        else if (authToken.indexOf("Bearer") != 0) {
-            response.put("error", "missing 'Bearer' in 'Authorization' header");
-            statusCode = 401;
-        }
-        else {
-            GoogleCredential credential = new GoogleCredential().setAccessToken(authToken.replace("Bearer ", ""));
-            Plus plus = new Plus.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
-                    .setApplicationName("CS496-Final/1.0")
-                    .build();
-
-            try {
-                Person profile = plus.people().get("me").execute();
-                response.put("name", profile.getDisplayName());
-            } catch (IOException ioe) {
-                response.put("error", ioe.getMessage());
-                statusCode = 400;
-            }
-        }
-
-        return json()
-                .status(statusCode)
-                .render(response);
     }
 }

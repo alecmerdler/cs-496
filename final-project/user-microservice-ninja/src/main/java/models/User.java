@@ -16,6 +16,12 @@ public class User extends Model {
     @Column(unique = true)
     private String email;
 
+    @Column()
+    private int age;
+
+    @Column()
+    private String nickname;
+
     public User() {
         this.username = "";
         this.email = "";
@@ -46,5 +52,21 @@ public class User extends Model {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

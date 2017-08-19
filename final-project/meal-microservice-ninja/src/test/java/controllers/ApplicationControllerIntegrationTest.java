@@ -35,13 +35,14 @@ import services.MessageService;
 import utils.UnirestObjectMapper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
 
 public class ApplicationControllerIntegrationTest extends NinjaTest {
+
+    final String oauthToken = "ya29.GlusBNEG7IjuczuVD3UvdeGt3tw1Ry3QiN8mAXjywotO-oeGAbTWZaz8hqWSY8rPFz8dlcA8jTbPsqSR3JPD6onLuPzUWnfOGRp6RFsB4eqgmoYbGeVgZ6QZDbpB";
 
     ObjectMapper objectMapper;
     MealDao mealDao;
@@ -196,28 +197,30 @@ public class ApplicationControllerIntegrationTest extends NinjaTest {
         }
     }
 
-    @Test
-    public void testCreateMealValid() {
-        Meal meal = new Meal("Banana", new Long(1), new ArrayList<>());
-        try {
-            HttpResponse<JsonNode> response = Unirest.post(mealsUrl)
-                    .header("accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(meal)
-                    .asJson();
-            Meal createdMeal = objectMapper.readValue(response.getBody().toString(), Meal.class);
-
-            assertEquals(201, response.getStatus());
-            assertEquals(meal.getMealName(), createdMeal.getMealName());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
+//    @Test
+//    public void testCreateMealValid() {
+//        Meal meal = new Meal("Banana", new Long(1), new ArrayList<>());
+//        try {
+//            HttpResponse<JsonNode> response = Unirest.post(mealsUrl)
+//                    .header("accept", "application/json")
+//                    .header("Content-Type", "application/json")
+//                    .header("Authorization", "Bearer " + oauthToken)
+//                    .body(meal)
+//                    .asJson();
+//            Meal createdMeal = objectMapper.readValue(response.getBody().toString(), Meal.class);
+//
+//            assertEquals(201, response.getStatus());
+//            assertEquals(meal.getMealName(), createdMeal.getMealName());
+//        } catch (Exception e) {
+//            fail(e.getMessage());
+//        }
+//    }
 
     @Test
     public void testCreateMealInvalid() {
         try {
             HttpResponse<JsonNode> response = Unirest.post(mealsUrl)
+                    .header("Authorization", "Bearer " + oauthToken)
                     .asJson();
 
             assertEquals(400, response.getStatus());
@@ -266,6 +269,7 @@ public class ApplicationControllerIntegrationTest extends NinjaTest {
             HttpResponse<JsonNode> response = Unirest.put(mealsUrl + "/" + meal.getId())
                     .header("accept", "application/json")
                     .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + oauthToken)
                     .body(meal)
                     .asJson();
             Meal responseMeal = objectMapper.readValue(response.getBody().toString(), Meal.class);
@@ -287,6 +291,7 @@ public class ApplicationControllerIntegrationTest extends NinjaTest {
             HttpResponse<JsonNode> response = Unirest.put(mealsUrl + "/" + meal.getId())
                     .header("accept", "application/json")
                     .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + oauthToken)
                     .body(meal)
                     .asJson();
             Map<String, Object> responseBody = objectMapper.readValue(response.getBody().toString(), new TypeReference<Map>(){});
@@ -302,6 +307,7 @@ public class ApplicationControllerIntegrationTest extends NinjaTest {
         Meal meal = new Meal("Steak", new Long(32), null, new Long(2));
         try {
             HttpResponse<JsonNode> response = Unirest.delete(mealsUrl + "/" + meal.getId())
+                    .header("Authorization", "Bearer " + oauthToken)
                     .asJson();
 
             assertEquals(404, response.getStatus());
@@ -316,42 +322,10 @@ public class ApplicationControllerIntegrationTest extends NinjaTest {
         mealDao.create(meal);
         try {
             HttpResponse<JsonNode> response = Unirest.delete(mealsUrl + "/" + meal.getId())
+                    .header("Authorization", "Bearer " + oauthToken)
                     .asJson();
 
             assertEquals(204, response.getStatus());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testPurchaseMealDoesNotExist() {
-        Long mealId = new Long(23);
-        try {
-            HttpResponse<JsonNode> response = Unirest.post(mealsUrl + "/" + mealId + "/purchase")
-                    .asJson();
-
-            assertEquals(404, response.getStatus());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testPurchaseMealExists() {
-        Meal meal = new Meal("Steak");
-        mealDao.create(meal);
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("userId", new Long(29));
-        try {
-            HttpResponse<JsonNode> response = Unirest.post(mealsUrl + "/" + meal.getId() + "/purchase")
-                    .header("accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(requestBody)
-                    .asJson();
-            Map<String, Object> responseBody = objectMapper.readValue(response.getBody().toString(), new TypeReference<Map>(){});
-
-            assertEquals(200, response.getStatus());
         } catch (Exception e) {
             fail(e.getMessage());
         }

@@ -1,5 +1,7 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.List;
  * Created by alec on 10/11/16.
  */
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Meal extends Model {
 
     @Column(nullable = false)
@@ -15,6 +18,12 @@ public class Meal extends Model {
 
     @Column(nullable = false)
     private Long chefId;
+
+    @Column()
+    private String description;
+
+    @Column(nullable = false)
+    private int price;
 
     @ManyToMany(cascade = CascadeType.ALL,
                 fetch = FetchType.EAGER)
@@ -54,6 +63,14 @@ public class Meal extends Model {
         this.id = id;
     }
 
+    public Meal(String mealName, String description, Long chefId, List<Tag> tags, Long id) {
+        this.mealName = mealName;
+        this.description = description;
+        this.chefId = chefId;
+        this.tags = tags;
+        this.id = id;
+    }
+
     public String getMealName() {
         return mealName;
     }
@@ -68,6 +85,22 @@ public class Meal extends Model {
 
     public void setChefId(Long chefId) {
         this.chefId = chefId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 
     public List<Tag> getTags() {
